@@ -1,6 +1,7 @@
 ﻿using System;
 using FactExpressions.Conversion;
 using FactExpressions.Events;
+using FactExpressions.Language;
 using FactExpressions.Relations;
 
 namespace FactExpressions
@@ -9,40 +10,48 @@ namespace FactExpressions
     {
         static void Main(string[] args)
         {
-            var relationStore = new RelationStore();
-            relationStore.AddSimpleRelation(typeof(Birthday), typeof(Person));
-            relationStore.DeclareThat<Birthday>().CanAlter<Person>(p => p.Age);
-
             var robin    = new Person("Robin", age: 35);
-            var robinNew = new Person("Robin", age: 36);
-            var birthday = new Birthday();
+            var robinNew = new Person("Robin2", age: 36);
 
             var eventLogger = new EventLogger();
-            eventLogger.LogAsEvent(birthday);
+            
+            eventLogger.LogAsEvent(new BusMessage("birthday", null));
             eventLogger.LogThat(robin).Became(robinNew);
 
-            var analyser = new EventAnalyser(relationStore, StaticDescribers());
+            var analyser = new EventAnalyser(GetRelationStore(), GetDescribers());
 
-            var exps = analyser.GetExpressions(eventLogger);
-
-            foreach (var exp in exps)
-            {
-                Console.WriteLine(exp);
-            }
-
+            foreach (var exp in analyser.GetExpressions(eventLogger)) Console.WriteLine(exp);
             Console.ReadLine();
         }
 
-        static ObjectExpressionConverter StaticDescribers()
+        static RelationStore GetRelationStore()
+        {
+            var relationStore = new RelationStore();
+            relationStore.DeclareThat<BusMessage>(m => m.Type == "birthday").CanAlter<Person>(p => p.Age);
+            return relationStore;
+        }
+
+        static ObjectExpressionConverter GetDescribers()
         {
             var c = new ObjectExpressionConverter();
-
-            c.AddDescriber<Person>(p => new NounExpression($"{p.Name}"));
-            c.AddDescriber<Birthday>(p => new NounExpression("birthday"));
-
+            c.AddDescriber<Person>(p => new Noun($"{p.Name}"));
+            c.AddPronoun<Person>(p => Pronouns.Male);
+            c.AddDescriber<BusMessage>(m=> new Noun($"Message of type {m.Type}"));
             return c;
         }
 
+    }
+
+    public class BusMessage
+    {
+        public string Type { get; }
+        public string Payload { get; }
+
+        public BusMessage(string type, string payload)
+        {
+            Type = type;
+            Payload = payload;
+        }
     }
 
     public class Person
@@ -60,10 +69,5 @@ namespace FactExpressions
         {
             return Name;
         }
-    }
-
-    class Birthday
-    {
-        
     }
 }

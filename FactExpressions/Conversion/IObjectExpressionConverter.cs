@@ -11,5 +11,9 @@ namespace FactExpressions.Conversion
         IExpression Get(object obj);
         IExpression FromPropertyDifferences(Type objectType, IEnumerable<PropertyDifference> differences);
         IExpression GetPossessive(object subject, PropertyInfo info);
+
+        Pronoun GetPronoun(object obj);
+        IExpression FromPropertyDifferences(object subject, IEnumerable<PropertyDifference> differences);
+        void AddPronoun<T>(Func<T, Pronoun> describer);
     }
 }

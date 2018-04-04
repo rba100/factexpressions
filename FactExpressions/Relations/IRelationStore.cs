@@ -13,4 +13,9 @@ namespace FactExpressions.Relations
         IReadOnlyCollection<Type> GetSimpleRelations(Type type);
         int TypeConnectivity(Type type);
     }
+
+    public interface IRelationStore2
+    {
+        
+    }
 }

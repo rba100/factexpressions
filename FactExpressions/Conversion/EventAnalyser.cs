@@ -3,6 +3,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using FactExpressions.Events;
+using FactExpressions.Language;
 using FactExpressions.Relations;
 
 namespace FactExpressions.Conversion
@@ -102,17 +103,20 @@ namespace FactExpressions.Conversion
                     if (detail.Object != null && detail.Object.GetType() == detail.Subject?.GetType())
                     {
                         var diffs = m_ObjectPropertyComparer.Compare(detail.Subject, detail.Object).ToArray();
-                        var exp = diffs.Select(diff =>
-                            new VerbExpression(Verbs.ToBecome,
-                                m_ObjectExpressionConverter.GetPossessive(detail.Subject, diff.Property),
-                                m_ObjectExpressionConverter.Get(diff.Current)));
-                        return Collapse(exp, "and");
+                        return m_ObjectExpressionConverter.FromPropertyDifferences(detail.Subject, diffs);
+                        //var exp = diffs.Select(diff =>
+                        //    new VerbExpression(Verbs.ToBecome,
+                        //        m_ObjectExpressionConverter.GetPossessive(detail.Subject, diff.Property),
+                        //        m_ObjectExpressionConverter.Get(diff.Current)));
+                        //return Collapse(exp, "and");
                     }
                     return new VerbExpression(Verbs.ToBecome, subjectArgument, obj);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+
 
         private IExpression Collapse(IEnumerable<IExpression> expressions, string conjuntion)
         {

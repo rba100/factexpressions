@@ -49,15 +49,23 @@
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventLogger.cs" />
     <Compile Include="Events\IEventLogger.cs" />
-    <Compile Include="IExpression.cs" />
+    <Compile Include="Language\DefiniteNounExpression.cs" />
+    <Compile Include="Language\IExpression.cs" />
     <Compile Include="Conversion\ObjectExpressionConverter.cs" />
+    <Compile Include="Language\IndefiniteNounExpression.cs" />
+    <Compile Include="Language\IVerbExpression.cs" />
+    <Compile Include="Language\NounExpression.cs" />
+    <Compile Include="Language\NounPhrase.cs" />
+    <Compile Include="Language\PossessiveExpression.cs" />
+    <Compile Include="Language\VerbExpression.cs" />
     <Compile Include="Relations\IRelationStore.cs" />
-    <Compile Include="PrepositionExpression.cs" />
+    <Compile Include="Language\PrepositionExpression.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Nouns.cs" />
+    <Compile Include="Language\Nouns.cs" />
     <Compile Include="Relations\RelationStore.cs" />
-    <Compile Include="Verbs.cs" />
+    <Compile Include="Relations\RelationExperiment.cs" />
+    <Compile Include="Language\Verbs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

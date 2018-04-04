@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using FactExpressions.Language;
 
 namespace FactExpressions
 {
@@ -73,12 +74,12 @@ namespace FactExpressions
             return CausalInstanceBuilder.From(verbExpression);
         }
 
-        public static IVerbExpression Became(this INounExpression beforeNoun, INounExpression afterNoun)
+        public static IVerbExpression Became(this INoun beforeNoun, INoun afterNoun)
         {
             return new VerbExpression(Verbs.ToBecome, beforeNoun, afterNoun, Tense.Past);
         }
 
-        public static IVerbExpression Had(this INounExpression beforeNoun, INounExpression afterNoun)
+        public static IVerbExpression Had(this INoun beforeNoun, INoun afterNoun)
         {
             return new VerbExpression(Verbs.ToHave, beforeNoun, afterNoun, Tense.Past);
         }

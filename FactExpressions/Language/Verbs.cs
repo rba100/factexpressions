@@ -1,55 +1,20 @@
 ﻿using System;
 
-namespace FactExpressions
+namespace FactExpressions.Language
 {
     public enum Tense { Present, Past }
 
     public interface IVerb
     {
-        string Conjugate(INounExpression subject, Tense tense);
+        string Conjugate(INoun subject, Tense tense);
     }
 
     public static class VerbExtensionMethods
     {
         public static string Conjugate(this IVerb verb, IExpression subject, Tense tense)
         {
-            var nounExpression = new NounExpression(subject.ToString());
+            var nounExpression = new Noun(subject.ToString());
             return verb.Conjugate(nounExpression, tense);
-        }
-    }
-
-    public interface IVerbExpression : IExpression
-    {
-        
-    }
-
-    public class VerbExpression : IVerbExpression
-    {
-        private readonly IVerb Verb;
-        private readonly Tense Tense;
-        private readonly IExpression Subject;
-        private readonly IExpression Object;
-
-        public VerbExpression(IVerb verb, IExpression subject, IExpression objct, Tense tense = Tense.Past)
-        {
-            Verb = verb;
-            Tense = tense;
-            Subject = subject;
-            Object = objct;
-        }
-
-        public VerbExpression(IVerb verb, IExpression subject, Tense tense = Tense.Past)
-        {
-            Verb = verb;
-            Tense = tense;
-            Subject = subject;
-        }
-
-        public override string ToString()
-        {
-            if (Object != null)
-                return $"{Subject} {Verb.Conjugate(Subject, Tense)} {Object}";
-            return $"{Subject} {Verb.Conjugate(Subject, Tense)}";
         }
     }
 
@@ -59,15 +24,15 @@ namespace FactExpressions
         public static IVerb ToGo = new VerbToGo();
         public static IVerb ToBecome = new VerbToBecome();
         public static IVerb ToHave = new VerbToHave();
-        public static IVerb ToCreate = new VerbToCreate();
-        public static IVerb ToRemove = new VerbToRemove();
-        public static IVerb ToAlter = new VerbToAlter();
+        public static IVerb ToCreate = new VanillaVerb("create");
+        public static IVerb ToRemove = new VanillaVerb("remove");
+        public static IVerb ToAlter = new VanillaVerb("alter");
         public static IVerb ToOccur = new VerbToOccurr();
     }
 
     public class VerbToBe : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
             switch (subject.Class)
             {
@@ -85,7 +50,7 @@ namespace FactExpressions
 
     public class VerbToGo : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
             if (tense == Tense.Past) return "went";
 
@@ -97,7 +62,7 @@ namespace FactExpressions
 
     public class VerbToHave : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
             switch (subject.Class)
             {
@@ -115,7 +80,7 @@ namespace FactExpressions
 
     public class VerbToBecome : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
             if (tense == Tense.Past) return "became";
 
@@ -127,7 +92,7 @@ namespace FactExpressions
 
     public class VerbToOccurr : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
             if (tense == Tense.Past) return "occurred";
 
@@ -137,39 +102,25 @@ namespace FactExpressions
         }
     }
 
-    public class VerbToCreate : IVerb
+    public class VanillaVerb : IVerb
     {
-        public string Conjugate(INounExpression subject, Tense tense)
-        {
-            if (tense == Tense.Past) return "created";
+        private readonly string m_Stem;
 
-            return subject.Class == NounClass.It
-                ? "creates"
-                : "create";
+        public VanillaVerb(string stem)
+        {
+            m_Stem = stem;
         }
-    }
 
-    public class VerbToRemove : IVerb
-    {
-        public string Conjugate(INounExpression subject, Tense tense)
+        public string Conjugate(INoun subject, Tense tense)
         {
-            if (tense == Tense.Past) return "removed";
+            if (tense == Tense.Past)
+            {
+                return m_Stem.EndsWith("e") ? $"{m_Stem}d" : $"{m_Stem}ed";
+            }
 
             return subject.Class == NounClass.It
-                ? "removes"
-                : "remove";
-        }
-    }
-
-    public class VerbToAlter : IVerb
-    {
-        public string Conjugate(INounExpression subject, Tense tense)
-        {
-            if (tense == Tense.Past) return "altered";
-
-            return subject.Class == NounClass.It
-                ? "alters"
-                : "alter";
+                ? $"{m_Stem}s"
+                : m_Stem;
         }
     }
 }

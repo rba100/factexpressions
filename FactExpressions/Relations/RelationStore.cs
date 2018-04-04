@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FactExpressions.Relations
 {
@@ -45,6 +46,11 @@ namespace FactExpressions.Relations
         public IRelationBuilder DeclareThat<T>()
         {
             return new RelationBuilder(this, typeof(T));
+        }
+
+        public IRelationBuilder DeclareThat<T>(Predicate<T> predicate)
+        {
+            return new RelationBuilder(this, typeof(T), predicate);
         }
 
         public IReadOnlyCollection<Type> GetSimpleRelations(Type type)
@@ -101,11 +107,20 @@ namespace FactExpressions.Relations
         
         public Type Subject { get; }
         public object Object { get; }
+        public object SubjectFilter { get; }
 
         public CausalRelation(RelationType relationType, Type subject, object o)
         {
             RelationType = relationType;
             Subject = subject;
+            Object = o;
+        }
+
+        public CausalRelation(RelationType relationType, Type subject, object subjectFilter, object o)
+        {
+            RelationType = relationType;
+            Subject = subject;
+            SubjectFilter = subjectFilter;
             Object = o;
         }
     }
@@ -117,13 +132,22 @@ namespace FactExpressions.Relations
         private readonly IRelationStore m_RelationStore;
         private readonly Type m_Type;
 
+        private object m_Predicate;
+
         internal RelationBuilder(IRelationStore relationStore, Type type)
         {
             m_RelationStore = relationStore;
             m_Type = type;
         }
 
-        public IRelationStore CanAlter<T>(Expression<Func<T, object>> selector)
+        internal RelationBuilder(IRelationStore relationStore, Type type, object predicate)
+        {
+            m_RelationStore = relationStore;
+            m_Type = type;
+            m_Predicate = predicate;
+        }
+
+        public void CanAlter<T>(Expression<Func<T, object>> selector)
         {
             selector.Compile();
 
@@ -132,12 +156,11 @@ namespace FactExpressions.Relations
             var t2 = t1.Member as PropertyInfo;
 
             m_RelationStore.AddCausalRelation(new CausalRelation(RelationType.Alter, m_Type, t2));
-            return m_RelationStore;
         }
     }
 
     public interface IRelationBuilder
     {
-        IRelationStore CanAlter<T>(Expression<Func<T, object>> selector);
+        void CanAlter<T>(Expression<Func<T, object>> selector);
     }
 }
