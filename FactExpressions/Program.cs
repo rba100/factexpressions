@@ -10,11 +10,11 @@ namespace FactExpressions
     {
         static void Main(string[] args)
         {
-            var robin    = new Person("Robin", age: 35);
-            var robinNew = new Person("Robin2", age: 36);
+            var robin = new Person("Robin", age: 35);
+            var robinNew = new Person("Robin", age: 36) { HairColour = "grey" };
 
             var eventLogger = new EventLogger();
-            
+
             eventLogger.LogAsEvent(new BusMessage("birthday", null));
             eventLogger.LogThat(robin).Became(robinNew);
 
@@ -36,7 +36,7 @@ namespace FactExpressions
             var c = new ObjectExpressionConverter();
             c.AddDescriber<Person>(p => new Noun($"{p.Name}"));
             c.AddPronoun<Person>(p => Pronouns.Male);
-            c.AddDescriber<BusMessage>(m=> new Noun($"Message of type {m.Type}"));
+            c.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
             return c;
         }
 
@@ -58,6 +58,8 @@ namespace FactExpressions
     {
         public string Name { get; }
         public Double Age { get; }
+
+        public string HairColour { get; set; }
 
         public Person(string name, double age)
         {
