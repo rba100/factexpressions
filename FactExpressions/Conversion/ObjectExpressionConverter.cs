@@ -2,6 +2,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace FactExpressions.Conversion
 {
@@ -46,11 +47,15 @@ namespace FactExpressions.Conversion
             IEnumerable<IExpression> differenceExpressions = diffs.Select(d =>
                 new VerbExpression
                 (Verbs.ToBecome,
-                    Tense.Past,
                     new NounExpression(d.Property.Name),
                     Get(d.Current)));
 
             return differenceExpressions.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
+        }
+
+        public IExpression GetPossessive(object subject, PropertyInfo info)
+        {
+            return new PossessiveExpression(Get(subject), new NounExpression(info.Name));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace FactExpressions.Relations
         void AddSimpleRelation(Type a, Type b);
         void AddCausalRelation(CausalRelation causalRelation);
 
-        IRelationBuilder Declare(Type type);
+        IRelationBuilder DeclareThat(Type type);
 
         IReadOnlyCollection<Type> GetSimpleRelations(Type type);
         int TypeConnectivity(Type type);

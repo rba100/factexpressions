@@ -11,6 +11,7 @@ namespace FactExpressions.Conversion
     {
         private readonly IRelationStore m_RelationStore;
         private readonly IObjectExpressionConverter m_ObjectExpressionConverter;
+        private readonly ObjectPropertyComparer m_ObjectPropertyComparer = new ObjectPropertyComparer();
 
         public EventAnalyser(IRelationStore relationStore,
                              IObjectExpressionConverter objectExpressionConverter)
@@ -46,14 +47,14 @@ namespace FactExpressions.Conversion
                     var chain = chains[chainKey ?? type];
 
                     var verbExpression = top
-                        ? new VerbExpression(Verbs.ToOccur, Tense.Past, m_ObjectExpressionConverter.Get(item))
+                        ? new VerbExpression(Verbs.ToOccur, m_ObjectExpressionConverter.Get(item))
                         : m_ObjectExpressionConverter.Get(item);
                     chain.Add(verbExpression);
                 }
                 else
                 {
                     var subjectType = eventDetails.Subject.GetType();
-                    var objectType = eventDetails.Object.GetType();
+                    var objectType = eventDetails.Object?.GetType();
 
                     var relatedTypes = m_RelationStore.GetSimpleRelations(subjectType)
                                        .Union(m_RelationStore.GetSimpleRelations(objectType));
@@ -66,7 +67,7 @@ namespace FactExpressions.Conversion
                     {
                         chain = new ExpressionChain();
                         if (!chains.ContainsKey(subjectType)) chains[subjectType] = chain;
-                        if (!chains.ContainsKey(objectType)) chains[objectType] = chain;
+                        if (objectType != null && !chains.ContainsKey(objectType)) chains[objectType] = chain;
                     }
                     else
                     {
@@ -82,18 +83,32 @@ namespace FactExpressions.Conversion
 
         private IExpression FromEventDetail(EventDetail detail)
         {
-            var sub = detail.Subject == null ? null : m_ObjectExpressionConverter.Get(detail.Subject);
             var obj = detail.Object == null ? null : m_ObjectExpressionConverter.Get(detail.Object);
+            var sub = detail.Subject == null ? null : m_ObjectExpressionConverter.Get(detail.Subject);
+
+            var subjectArgument = obj == null
+                ? new VerbExpression(Verbs.ToBe, sub)
+                : sub;
+
             switch (detail.EventDetailType)
             {
                 case EventDetailTypes.Created:
-                    return new VerbExpression(Verbs.ToCreate, Tense.Past, sub, obj);
+                    return new VerbExpression(Verbs.ToCreate, subjectArgument, obj);
                 case EventDetailTypes.Removed:
-                    return new VerbExpression(Verbs.ToRemove, Tense.Past, sub, obj);
+                    return new VerbExpression(Verbs.ToRemove, subjectArgument, obj);
                 case EventDetailTypes.Altered:
-                    return new VerbExpression(Verbs.ToAlter, Tense.Past, sub, obj);
+                    return new VerbExpression(Verbs.ToAlter, subjectArgument, obj);
                 case EventDetailTypes.Became:
-                    return new VerbExpression(Verbs.ToBecome, Tense.Past, sub, obj);
+                    if (detail.Object != null && detail.Object.GetType() == detail.Subject?.GetType())
+                    {
+                        var diffs = m_ObjectPropertyComparer.Compare(detail.Subject, detail.Object).ToArray();
+                        var exp = diffs.Select(diff =>
+                            new VerbExpression(Verbs.ToBecome,
+                                m_ObjectExpressionConverter.GetPossessive(detail.Subject, diff.Property),
+                                m_ObjectExpressionConverter.Get(diff.Current)));
+                        return Collapse(exp, "and");
+                    }
+                    return new VerbExpression(Verbs.ToBecome, subjectArgument, obj);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -107,7 +122,7 @@ namespace FactExpressions.Conversion
 
     public class ExpressionChain
     {
-        private readonly IList<IExpression> m_OrderedExpressions 
+        private readonly IList<IExpression> m_OrderedExpressions
             = new List<IExpression>();
 
         public void Add(IExpression expression)

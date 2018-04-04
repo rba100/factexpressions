@@ -37,9 +37,14 @@ namespace FactExpressions.Relations
             list.Add(causalRelation);
         }
 
-        public IRelationBuilder Declare(Type type)
+        public IRelationBuilder DeclareThat(Type type)
         {
             return new RelationBuilder(this, type);
+        }
+
+        public IRelationBuilder DeclareThat<T>()
+        {
+            return new RelationBuilder(this, typeof(T));
         }
 
         public IReadOnlyCollection<Type> GetSimpleRelations(Type type)

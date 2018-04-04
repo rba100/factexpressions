@@ -30,7 +30,7 @@ namespace FactExpressions
         private readonly IExpression Subject;
         private readonly IExpression Object;
 
-        public VerbExpression(IVerb verb, Tense tense, IExpression subject, IExpression objct)
+        public VerbExpression(IVerb verb, IExpression subject, IExpression objct, Tense tense = Tense.Past)
         {
             Verb = verb;
             Tense = tense;
@@ -38,7 +38,7 @@ namespace FactExpressions
             Object = objct;
         }
 
-        public VerbExpression(IVerb verb, Tense tense, IExpression subject)
+        public VerbExpression(IVerb verb, IExpression subject, Tense tense = Tense.Past)
         {
             Verb = verb;
             Tense = tense;

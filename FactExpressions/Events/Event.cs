@@ -23,6 +23,12 @@ namespace FactExpressions.Events
             Object = o;
             EventDetailType = eventDetailType;
         }
+
+        public EventDetail(object subject, EventDetailTypes eventDetailType)
+        {
+            Subject = subject;
+            EventDetailType = eventDetailType;
+        }
     }
 
     public class EventBuilder
@@ -57,6 +63,12 @@ namespace FactExpressions.Events
         public EventLogger Became(object obj)
         {
             m_EventLogger.Details.Add(new EventDetail(m_Subject, obj, EventDetailTypes.Became));
+            return m_EventLogger;
+        }
+
+        public EventLogger WasCreated()
+        {
+            m_EventLogger.Details.Add(new EventDetail(m_Subject, EventDetailTypes.Created));
             return m_EventLogger;
         }
     }

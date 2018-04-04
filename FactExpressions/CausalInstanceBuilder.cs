@@ -75,12 +75,12 @@ namespace FactExpressions
 
         public static IVerbExpression Became(this INounExpression beforeNoun, INounExpression afterNoun)
         {
-            return new VerbExpression(Verbs.ToBecome, Tense.Past, beforeNoun, afterNoun);
+            return new VerbExpression(Verbs.ToBecome, beforeNoun, afterNoun, Tense.Past);
         }
 
         public static IVerbExpression Had(this INounExpression beforeNoun, INounExpression afterNoun)
         {
-            return new VerbExpression(Verbs.ToHave, Tense.Past, beforeNoun, afterNoun);
+            return new VerbExpression(Verbs.ToHave, beforeNoun, afterNoun, Tense.Past);
         }
     }
 }
