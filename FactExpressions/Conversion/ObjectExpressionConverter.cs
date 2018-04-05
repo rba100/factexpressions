@@ -7,7 +7,7 @@ using FactExpressions.Language;
 namespace FactExpressions.Conversion
 {
     /// <summary>
-    /// Maps Types to INounExpressions
+    /// Maps objects to language constructs
     /// </summary>
     public class ObjectExpressionConverter : IObjectExpressionConverter
     {
@@ -48,7 +48,7 @@ namespace FactExpressions.Conversion
             return new Noun(result as string);
         }
 
-        public IExpression FromPropertyDifferences(object subject, IEnumerable<PropertyDifference> differences)
+        public IExpression GetTransitionExpression(object subject, IEnumerable<PropertyDifference> differences)
         {
             var subExpression = Get(subject);
             var diffs = differences.ToArray();
@@ -60,32 +60,12 @@ namespace FactExpressions.Conversion
                 var poss = new Possessive(sub, GetNoun(diffs[i].Property));
                 diffExps.Add(new VerbExpression(Verbs.ToBecome, poss, Get(diffs[i].Current)));
             }
-
             return diffExps.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
         }
 
-        private INoun GetNoun(PropertyInfo propertyInfo)
+        public INoun GetPossessiveNoun(object owner, PropertyInfo owned)
         {
-            var name = propertyInfo.Name;
-            if (!name.Skip(1).Any(Char.IsUpper)) return new Noun(name.ToLowerInvariant());
-            if(!name.Any(Char.IsLower)) return new Noun(name.ToLowerInvariant());
-
-            IEnumerable<char> BreakByCamelCase(IEnumerable<char> chars)
-            {
-                bool firstDone = false;
-                foreach (var c in chars)
-                {
-                    if (firstDone && Char.IsUpper(c)) yield return ' ';
-                    yield return Char.ToLower(c);
-                    firstDone = true;
-                }
-            }
-            return new Noun(new string(BreakByCamelCase(name.ToCharArray()).ToArray()));
-        }
-
-        public INoun GetPossessive(object subject, PropertyInfo info)
-        {
-            return new Possessive(Get(subject), new Noun(info.Name));
+            return new Possessive(Get(owner), GetNoun(owned));
         }
 
         public Pronoun GetPronoun(object obj)
@@ -101,38 +81,24 @@ namespace FactExpressions.Conversion
             }
             return new Pronoun("it", "it", "its");
         }
-    }
 
-    public class Pronoun : INoun
-    {
-        public NounClass Class => NounClass.It;
-
-        public bool IsPlural => false;
-
-        public string AsSubject { get; }
-        public string AsObject { get; }
-        public string AsPossessive { get; }
-
-        public Pronoun(string asSubject,
-                       string asObject,
-                       string asPossessive)
+        private INoun GetNoun(PropertyInfo propertyInfo)
         {
-            AsSubject = asSubject;
-            AsObject = asObject;
-            AsPossessive = asPossessive;
-        }
+            var name = propertyInfo.Name;
+            if (!name.Skip(1).Any(Char.IsUpper)) return new Noun(name.ToLowerInvariant());
+            if (!name.Any(Char.IsLower)) return new Noun(name.ToLowerInvariant());
 
-        public override string ToString()
-        {
-            return AsSubject;
+            IEnumerable<char> BreakByCamelCase(IEnumerable<char> chars)
+            {
+                bool firstDone = false;
+                foreach (var c in chars)
+                {
+                    if (firstDone && Char.IsUpper(c)) yield return ' ';
+                    yield return Char.ToLower(c);
+                    firstDone = true;
+                }
+            }
+            return new Noun(new string(BreakByCamelCase(name.ToCharArray()).ToArray()));
         }
-    }
-
-    public static class Pronouns
-    {
-        public static Pronoun Male = new Pronoun("he", "him", "his");
-        public static Pronoun Female = new Pronoun("she", "her", "her");
-        public static Pronoun GenderInvariant = new Pronoun("they", "them", "their");
-        public static Pronoun It = new Pronoun("it", "it", "its");
     }
 }

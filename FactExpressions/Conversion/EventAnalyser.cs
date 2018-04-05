@@ -99,7 +99,7 @@ namespace FactExpressions.Conversion
                     if (detail.Object != null && detail.Object.GetType() == detail.Subject?.GetType())
                     {
                         var diffs = m_ObjectPropertyComparer.Compare(detail.Subject, detail.Object).ToArray();
-                        return m_ObjectExpressionConverter.FromPropertyDifferences(detail.Subject, diffs);
+                        return m_ObjectExpressionConverter.GetTransitionExpression(detail.Subject, diffs);
                     }
                     return new VerbExpression(Verbs.ToBecome, sub, obj);
                 case EventDetailTypes.Received:

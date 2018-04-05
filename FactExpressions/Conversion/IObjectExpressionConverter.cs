@@ -9,11 +9,12 @@ namespace FactExpressions.Conversion
     {
         void AddDescriber<T>(Func<T, INoun> describer);
         void AddDescriber<T>(Func<T, string> describer);
-        INoun Get(object obj);
-        INoun GetPossessive(object subject, PropertyInfo info);
-
-        Pronoun GetPronoun(object obj);
-        IExpression FromPropertyDifferences(object subject, IEnumerable<PropertyDifference> differences);
         void AddPronoun<T>(Func<T, Pronoun> describer);
+
+        INoun Get(object obj);
+        INoun GetPossessiveNoun(object owner, PropertyInfo owned);
+        Pronoun GetPronoun(object obj);
+
+        IExpression GetTransitionExpression(object subject, IEnumerable<PropertyDifference> differences);
     }
 }

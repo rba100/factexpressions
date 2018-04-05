@@ -46,6 +46,7 @@
     <Compile Include="Conversion\IObjectExpressionConverter.cs" />
     <Compile Include="CausalInstanceBuilder.cs" />
     <Compile Include="Conversion\ObjectPropertyComparer.cs" />
+    <Compile Include="Language\Pronoun.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventLogger.cs" />
     <Compile Include="Events\IEventLogger.cs" />

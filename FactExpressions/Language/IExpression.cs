@@ -1,4 +1,4 @@
-namespace FactExpressions
+namespace FactExpressions.Language
 {
     public interface IExpression
     {
