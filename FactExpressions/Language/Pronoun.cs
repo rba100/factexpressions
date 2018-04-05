@@ -11,8 +11,8 @@ namespace FactExpressions.Language
         public string AsPossessive { get; }
 
         public Pronoun(string asSubject,
-            string asObject,
-            string asPossessive)
+                       string asObject,
+                       string asPossessive)
         {
             AsSubject = asSubject;
             AsObject = asObject;
