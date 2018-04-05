@@ -48,34 +48,39 @@ namespace FactExpressions.Conversion
             return new Noun(result as string);
         }
 
-        public IExpression FromPropertyDifferences(Type objectType, IEnumerable<PropertyDifference> differences)
-        {
-            var diffs = differences.ToArray();
-            if (!diffs.Any()) throw new ArgumentException("There were no differences", nameof(differences));
-
-            IEnumerable<IExpression> differenceExpressions = diffs.Select(d =>
-                new VerbExpression
-                (Verbs.ToBecome,
-                    new Noun(d.Property.Name),
-                    Get(d.Current)));
-
-            return differenceExpressions.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
-        }
-
         public IExpression FromPropertyDifferences(object subject, IEnumerable<PropertyDifference> differences)
         {
-            var subExpression = Get(subject) as INoun;
+            var subExpression = Get(subject);
             var diffs = differences.ToArray();
             if (!diffs.Any()) throw new ArgumentException("There were no differences", nameof(differences));
             var diffExps = new List<IExpression>();
             for (int i = 0; i < diffs.Length; i++)
             {
                 var sub = i == 0 ? subExpression : GetPronoun(subject);
-                var poss = new Possessive(sub, new Noun(diffs[i].Property.Name.ToLowerInvariant()));
+                var poss = new Possessive(sub, GetNoun(diffs[i].Property));
                 diffExps.Add(new VerbExpression(Verbs.ToBecome, poss, Get(diffs[i].Current)));
             }
 
             return diffExps.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
+        }
+
+        private INoun GetNoun(PropertyInfo propertyInfo)
+        {
+            var name = propertyInfo.Name;
+            if (!name.Skip(1).Any(Char.IsUpper)) return new Noun(name.ToLowerInvariant());
+            if(!name.Any(Char.IsLower)) return new Noun(name.ToLowerInvariant());
+
+            IEnumerable<char> BreakByCamelCase(IEnumerable<char> chars)
+            {
+                bool firstDone = false;
+                foreach (var c in chars)
+                {
+                    if (firstDone && Char.IsUpper(c)) yield return ' ';
+                    yield return Char.ToLower(c);
+                    firstDone = true;
+                }
+            }
+            return new Noun(new string(BreakByCamelCase(name.ToCharArray()).ToArray()));
         }
 
         public INoun GetPossessive(object subject, PropertyInfo info)

@@ -10,7 +10,6 @@ namespace FactExpressions.Conversion
         void AddDescriber<T>(Func<T, INoun> describer);
         void AddDescriber<T>(Func<T, string> describer);
         INoun Get(object obj);
-        IExpression FromPropertyDifferences(Type objectType, IEnumerable<PropertyDifference> differences);
         INoun GetPossessive(object subject, PropertyInfo info);
 
         Pronoun GetPronoun(object obj);
