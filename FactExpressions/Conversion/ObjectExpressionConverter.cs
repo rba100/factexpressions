@@ -34,6 +34,8 @@ namespace FactExpressions.Conversion
 
         public IExpression Get(object obj)
         {
+            if(obj == null) return new Noun("null");
+
             var type = obj.GetType();
             var describer = m_Describers.ContainsKey(type) ? m_Describers[type] : null;
             var converter = describer as Delegate;

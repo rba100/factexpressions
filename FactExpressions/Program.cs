@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using System;
+
 using FactExpressions.Conversion;
 using FactExpressions.Events;
 using FactExpressions.Language;
@@ -10,7 +12,7 @@ namespace FactExpressions
     {
         static void Main(string[] args)
         {
-            var robin = new Person("Robin", age: 35);
+            var robin    = new Person("Robin", age: 35);
             var robinNew = new Person("Robin", age: 36) { HairColour = "grey" };
 
             var eventLogger = new EventLogger();
@@ -39,7 +41,6 @@ namespace FactExpressions
             c.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
             return c;
         }
-
     }
 
     public class BusMessage
