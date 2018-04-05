@@ -17,7 +17,7 @@ namespace FactExpressions
 
             var eventLogger = new EventLogger();
 
-            eventLogger.LogAsEvent(new BusMessage("birthday", null));
+            eventLogger.LogThat(new BusMessage("birthday", null)).WasReceived();
             eventLogger.LogThat(robin).Became(robinNew);
 
             var analyser = new EventAnalyser(GetRelationStore(), GetDescribers());

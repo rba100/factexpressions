@@ -20,7 +20,7 @@ namespace FactExpressions.Conversion
             m_Describers.Add(type, describer);
         }
 
-        public void AddDescriber<T>(Func<T, IExpression> describer)
+        public void AddDescriber<T>(Func<T, INoun> describer)
         {
             var type = typeof(T);
             m_Describers.Add(type, describer);
@@ -32,7 +32,7 @@ namespace FactExpressions.Conversion
             m_Pronouns.Add(type, describer);
         }
 
-        public IExpression Get(object obj)
+        public INoun Get(object obj)
         {
             if(obj == null) return new Noun("null");
 
@@ -41,9 +41,9 @@ namespace FactExpressions.Conversion
             var converter = describer as Delegate;
             if (converter == null) return new Noun(obj.ToString());
             var result = converter.DynamicInvoke(obj);
-            if (result is IExpression)
+            if (result is INoun)
             {
-                return result as IExpression;
+                return result as INoun;
             }
             return new Noun(result as string);
         }
@@ -78,7 +78,7 @@ namespace FactExpressions.Conversion
             return diffExps.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
         }
 
-        public IExpression GetPossessive(object subject, PropertyInfo info)
+        public INoun GetPossessive(object subject, PropertyInfo info)
         {
             return new Possessive(Get(subject), new Noun(info.Name));
         }

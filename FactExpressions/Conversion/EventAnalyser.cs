@@ -47,14 +47,14 @@ namespace FactExpressions.Conversion
                     }
                     var chain = chains[chainKey ?? type];
 
-                    var verbExpression = top
-                        ? new VerbExpression(Verbs.ToOccur, m_ObjectExpressionConverter.Get(item))
+                    var expression = top
+                        ? new VerbExpression(Verbs.ToOccur, m_ObjectExpressionConverter.Get(item)) as IExpression
                         : m_ObjectExpressionConverter.Get(item);
-                    chain.Add(verbExpression);
+                    chain.Add(expression);
                 }
                 else
                 {
-                    var subjectType = eventDetails.Subject.GetType();
+                    var subjectType = eventDetails.Subject?.GetType();
                     var objectType = eventDetails.Object?.GetType();
 
                     var relatedTypes = m_RelationStore.GetSimpleRelations(subjectType)
@@ -67,8 +67,8 @@ namespace FactExpressions.Conversion
                     if (chainKey == null)
                     {
                         chain = new ExpressionChain();
-                        if (!chains.ContainsKey(subjectType)) chains[subjectType] = chain;
-                        if (objectType != null && !chains.ContainsKey(objectType)) chains[objectType] = chain;
+                        if (subjectType != null && !chains.ContainsKey(subjectType)) chains[subjectType] = chain;
+                        if (objectType != null  && !chains.ContainsKey(objectType))  chains[objectType]  = chain;
                     }
                     else
                     {
@@ -87,30 +87,23 @@ namespace FactExpressions.Conversion
             var obj = detail.Object == null ? null : m_ObjectExpressionConverter.Get(detail.Object);
             var sub = detail.Subject == null ? null : m_ObjectExpressionConverter.Get(detail.Subject);
 
-            var subjectArgument = obj == null
-                ? new VerbExpression(Verbs.ToBe, sub)
-                : sub;
-
             switch (detail.EventDetailType)
             {
                 case EventDetailTypes.Created:
-                    return new VerbExpression(Verbs.ToCreate, subjectArgument, obj);
+                    return new VerbExpression(Verbs.ToCreate, sub, obj);
                 case EventDetailTypes.Removed:
-                    return new VerbExpression(Verbs.ToRemove, subjectArgument, obj);
+                    return new VerbExpression(Verbs.ToRemove, sub, obj);
                 case EventDetailTypes.Altered:
-                    return new VerbExpression(Verbs.ToAlter, subjectArgument, obj);
+                    return new VerbExpression(Verbs.ToAlter, sub, obj);
                 case EventDetailTypes.Became:
                     if (detail.Object != null && detail.Object.GetType() == detail.Subject?.GetType())
                     {
                         var diffs = m_ObjectPropertyComparer.Compare(detail.Subject, detail.Object).ToArray();
                         return m_ObjectExpressionConverter.FromPropertyDifferences(detail.Subject, diffs);
-                        //var exp = diffs.Select(diff =>
-                        //    new VerbExpression(Verbs.ToBecome,
-                        //        m_ObjectExpressionConverter.GetPossessive(detail.Subject, diff.Property),
-                        //        m_ObjectExpressionConverter.Get(diff.Current)));
-                        //return Collapse(exp, "and");
                     }
-                    return new VerbExpression(Verbs.ToBecome, subjectArgument, obj);
+                    return new VerbExpression(Verbs.ToBecome, sub, obj);
+                case EventDetailTypes.Received:
+                    return new VerbExpression(Verbs.ToReceive, sub, obj);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

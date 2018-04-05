@@ -2,7 +2,9 @@
 
 namespace FactExpressions.Events
 {
-    public enum EventDetailTypes { Created, Removed, Altered, Became }
+    public enum EventDetailTypes { Created, Removed, Altered, Became,
+        Received
+    }
 
     public class Event
     {
@@ -68,7 +70,13 @@ namespace FactExpressions.Events
 
         public EventLogger WasCreated()
         {
-            m_EventLogger.Details.Add(new EventDetail(m_Subject, EventDetailTypes.Created));
+            m_EventLogger.Details.Add(new EventDetail(null, m_Subject, EventDetailTypes.Created));
+            return m_EventLogger;
+        }
+
+        public EventLogger WasReceived()
+        {
+            m_EventLogger.Details.Add(new EventDetail(null, m_Subject, EventDetailTypes.Received));
             return m_EventLogger;
         }
     }

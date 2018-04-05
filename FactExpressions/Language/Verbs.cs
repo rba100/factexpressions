@@ -6,7 +6,7 @@ namespace FactExpressions.Language
 
     public interface IVerb
     {
-        string Conjugate(INoun subject, Tense tense);
+        string Conjugate(INoun noun, Tense tense = Tense.Past);
     }
 
     public static class VerbExtensionMethods
@@ -15,6 +15,11 @@ namespace FactExpressions.Language
         {
             var nounExpression = new Noun(subject.ToString());
             return verb.Conjugate(nounExpression, tense);
+        }
+
+        public static string ConjugatePassive(this IVerb verb, INoun objct, Tense tense = Tense.Past)
+        {
+            return $"{objct} {Verbs.ToBe.Conjugate(objct, tense)} {verb.Conjugate(objct, tense)}";
         }
     }
 
@@ -28,13 +33,14 @@ namespace FactExpressions.Language
         public static IVerb ToRemove = new VanillaVerb("remove");
         public static IVerb ToAlter = new VanillaVerb("alter");
         public static IVerb ToOccur = new VerbToOccurr();
+        public static IVerb ToReceive = new VanillaVerb("receive");
     }
 
     public class VerbToBe : IVerb
     {
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
-            switch (subject.Class)
+            switch (noun.Class)
             {
                 case NounClass.I:
                     return tense == Tense.Present ? "am" : "was";
@@ -43,18 +49,18 @@ namespace FactExpressions.Language
                 case NounClass.It:
                     return tense == Tense.Present ? "is" : "was";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(subject.Class));
+                    throw new ArgumentOutOfRangeException(nameof(noun.Class));
             }
         }
     }
 
     public class VerbToGo : IVerb
     {
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
             if (tense == Tense.Past) return "went";
 
-            return subject.Class == NounClass.It
+            return noun.Class == NounClass.It
                 ? "goes"
                 : "go";
         }
@@ -62,9 +68,9 @@ namespace FactExpressions.Language
 
     public class VerbToHave : IVerb
     {
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
-            switch (subject.Class)
+            switch (noun.Class)
             {
                 case NounClass.I:
                     return tense == Tense.Present ? "have" : "had";
@@ -73,18 +79,18 @@ namespace FactExpressions.Language
                 case NounClass.It:
                     return tense == Tense.Present ? "has" : "had";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(subject.Class));
+                    throw new ArgumentOutOfRangeException(nameof(noun.Class));
             }
         }
     }
 
     public class VerbToBecome : IVerb
     {
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
             if (tense == Tense.Past) return "became";
 
-            return subject.Class == NounClass.It
+            return noun.Class == NounClass.It
                 ? "becomes"
                 : "become";
         }
@@ -92,11 +98,11 @@ namespace FactExpressions.Language
 
     public class VerbToOccurr : IVerb
     {
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
             if (tense == Tense.Past) return "occurred";
 
-            return subject.Class == NounClass.It
+            return noun.Class == NounClass.It
                 ? "occurs"
                 : "occur";
         }
@@ -111,14 +117,14 @@ namespace FactExpressions.Language
             m_Stem = stem;
         }
 
-        public string Conjugate(INoun subject, Tense tense)
+        public string Conjugate(INoun noun, Tense tense = Tense.Past)
         {
             if (tense == Tense.Past)
             {
                 return m_Stem.EndsWith("e") ? $"{m_Stem}d" : $"{m_Stem}ed";
             }
 
-            return subject.Class == NounClass.It
+            return noun.Class == NounClass.It
                 ? $"{m_Stem}s"
                 : m_Stem;
         }

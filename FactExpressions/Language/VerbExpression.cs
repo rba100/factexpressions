@@ -4,10 +4,14 @@
     {
         private readonly IVerb Verb;
         private readonly Tense Tense;
-        private readonly IExpression Subject;
-        private readonly IExpression Object;
+        private readonly INoun Subject;
+        private readonly INoun Object;
 
-        public VerbExpression(IVerb verb, IExpression subject, IExpression objct, Tense tense = Tense.Past)
+        public VerbExpression(
+            IVerb verb,
+            INoun subject = null,
+            INoun objct = null,
+            Tense tense = Tense.Past)
         {
             Verb = verb;
             Tense = tense;
@@ -15,18 +19,19 @@
             Object = objct;
         }
 
-        public VerbExpression(IVerb verb, IExpression subject, Tense tense = Tense.Past)
-        {
-            Verb = verb;
-            Tense = tense;
-            Subject = subject;
-        }
-
         public override string ToString()
         {
-            if (Object != null)
-                return $"{Subject} {Verb.Conjugate(Subject, Tense)} {Object}";
-            return $"{Subject} {Verb.Conjugate(Subject, Tense)}";
+            if (Subject == null)
+            {
+                return Verb.ConjugatePassive(Object, Tense);
+            }
+
+            if (Object == null)
+            {
+                return $"{Subject} {Verb.Conjugate(Subject, Tense)}";
+            }
+
+            return $"{Subject} {Verb.Conjugate(Subject, Tense)} {Object}";
         }
     }
 }
