@@ -25,20 +25,22 @@ namespace FactExpressions.Events
             return Events.Select(e => e.Copy()).ToList();
         }
 
-        public IEventScope OpenScope()
+        public IEventScope GetChildLogger()
         {
-            return new EventScope(Events.Last());
+            return new EventScope(Events.Last()
+                ?? throw new InvalidOperationException("Cannot open a child logger without an event to scope to."));
         }
 
         public EventBuilder AndThus(object subject)
         {
-            return OpenScope().LogThat(subject);
+            return GetChildLogger().LogThat(subject);
         }
     }
 
     public interface IScopingEventLogger : IEventLogger
     {
-        IEventScope OpenScope();
+        IEventScope GetChildLogger();
+
         EventBuilder AndThus(object subject);
     }
 
@@ -72,14 +74,14 @@ namespace FactExpressions.Events
             throw new InvalidOperationException("EventItems can only be queried from the root scope.");
         }
 
-        public IEventScope OpenScope()
+        public IEventScope GetChildLogger()
         {
             return new EventScope(Events.Last());
         }
 
         public EventBuilder AndThus(object subject)
         {
-            return OpenScope().LogThat(subject);
+            return GetChildLogger().LogThat(subject);
         }
     }
 }

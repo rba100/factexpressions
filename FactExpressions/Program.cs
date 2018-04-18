@@ -17,7 +17,7 @@ namespace FactExpressions
             var robinPrevious = new Person("Robin", age: 35) { HairColour = "brown" };
             var robinCurrent = new Person("Robin", age: 36) { HairColour = "grey" };
 
-            var eventLogger = new EventLogger();
+            IEventLogger eventLogger = new EventLogger();
 
             eventLogger.LogEvent(daybreakEventMessage);
 
@@ -30,7 +30,7 @@ namespace FactExpressions
             objectDescriber.AddDescriber<Person>(p => new Noun($"{p.Name}"));
             objectDescriber.AddPronoun<Person>(p => Pronouns.Male);
             objectDescriber.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
-            eventDescriber.Describe(eventLogger.Events).ToList().ForEach(e => e.PrintToConsole());
+            eventDescriber.Describe(eventLogger.EventItems()).ToList().ForEach(e => e.PrintToConsole());
 
             Console.ReadLine();
         }
