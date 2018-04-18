@@ -1,14 +1,35 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace FactExpressions.Events
 {
-    public enum EventDetailTypes { Created, Removed, Altered, Became,
+    public enum EventDetailTypes {
+        Created,
+        Removed,
+        Altered,
+        Became,
         Received
     }
 
     public class Event
     {
-        public IReadOnlyCollection<EventDetail> EventDetails { get; }
+        public object Object { get; }
+        public IList<Event> Children { get; }
+
+        public Event(object eventObject)
+        {
+            Object = eventObject ?? "null event";
+            Children = new List<Event>();
+        }
+
+        public Event Copy()
+        {
+            var evnt = new Event(Object);
+            Children.Select(c => c.Copy())
+                    .ToList()
+                    .ForEach(evnt.Children.Add);
+            return evnt;
+        }
     }
 
     public class EventDetail
@@ -35,49 +56,43 @@ namespace FactExpressions.Events
 
     public class EventBuilder
     {
-        private readonly EventLogger m_EventLogger;
+        private readonly IEventLogger m_EventLogger;
         private readonly object m_Subject;
 
-        public EventBuilder(EventLogger eventLogger, object subject)
+        public EventBuilder(IEventLogger eventLogger, object subject)
         {
             m_EventLogger = eventLogger;
             m_Subject = subject;
         }
 
-        public EventLogger Created(object obj)
+        public IScopingEventLogger Created(object obj)
         {
-            m_EventLogger.Details.Add(new EventDetail(m_Subject, obj, EventDetailTypes.Created));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(m_Subject, obj, EventDetailTypes.Created));
         }
 
-        public EventLogger Removed(object obj)
+        public IScopingEventLogger Removed(object obj)
         {
-            m_EventLogger.Details.Add(new EventDetail(m_Subject, obj, EventDetailTypes.Removed));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(m_Subject, obj, EventDetailTypes.Removed));
         }
 
-        public EventLogger Altered(object obj)
+        public IScopingEventLogger Altered(object obj)
         {
-            m_EventLogger.Details.Add(new EventDetail(m_Subject, obj, EventDetailTypes.Altered));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(m_Subject, obj, EventDetailTypes.Altered));
         }
 
-        public EventLogger Became(object obj)
+        public IScopingEventLogger Became(object obj)
         {
-            m_EventLogger.Details.Add(new EventDetail(m_Subject, obj, EventDetailTypes.Became));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(m_Subject, obj, EventDetailTypes.Became));
         }
 
-        public EventLogger WasCreated()
+        public IScopingEventLogger WasCreated()
         {
-            m_EventLogger.Details.Add(new EventDetail(null, m_Subject, EventDetailTypes.Created));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(null, m_Subject, EventDetailTypes.Created));
         }
 
-        public EventLogger WasReceived()
+        public IScopingEventLogger WasReceived()
         {
-            m_EventLogger.Details.Add(new EventDetail(null, m_Subject, EventDetailTypes.Received));
-            return m_EventLogger;
+            return m_EventLogger.LogEvent(new EventDetail(null, m_Subject, EventDetailTypes.Received));
         }
     }
 }

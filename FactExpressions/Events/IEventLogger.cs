@@ -5,7 +5,7 @@ namespace FactExpressions.Events
     public interface IEventLogger
     {
         EventBuilder LogThat(object subject);
-        void LogAsEvent(object obj);
-        IList<object> EventItems();
+        IScopingEventLogger LogEvent(object subject);
+        IList<Event> EventItems();
     }
 }

@@ -42,8 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Conversion\EventAnalyser.cs" />
-    <Compile Include="Conversion\IObjectExpressionConverter.cs" />
+    <Compile Include="Conversion\EventDescriber.cs" />
+    <Compile Include="Conversion\ExpressionTree.cs" />
+    <Compile Include="Conversion\IObjectDescriber.cs" />
     <Compile Include="Conversion\ObjectPropertyComparer.cs" />
     <Compile Include="Language\Pronoun.cs" />
     <Compile Include="Events\Event.cs" />
@@ -51,20 +52,17 @@
     <Compile Include="Events\IEventLogger.cs" />
     <Compile Include="Language\DefiniteNounExpression.cs" />
     <Compile Include="Language\IExpression.cs" />
-    <Compile Include="Conversion\ObjectExpressionConverter.cs" />
+    <Compile Include="Conversion\ObjectDescriber.cs" />
     <Compile Include="Language\IndefiniteNounExpression.cs" />
     <Compile Include="Language\IVerbExpression.cs" />
     <Compile Include="Language\NounExpression.cs" />
     <Compile Include="Language\NounPhrase.cs" />
     <Compile Include="Language\PossessiveExpression.cs" />
     <Compile Include="Language\VerbExpression.cs" />
-    <Compile Include="Relations\IRelationStore.cs" />
     <Compile Include="Language\PrepositionExpression.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Language\Nouns.cs" />
-    <Compile Include="Relations\RelationStore.cs" />
-    <Compile Include="Relations\RelationExperiment.cs" />
     <Compile Include="Language\Verbs.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,45 +1,38 @@
 ﻿
 using System;
+using System.Linq;
 
 using FactExpressions.Conversion;
 using FactExpressions.Events;
 using FactExpressions.Language;
-using FactExpressions.Relations;
 
 namespace FactExpressions
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var robin    = new Person("Robin", age: 35);
-            var robinNew = new Person("Robin", age: 36) { HairColour = "grey" };
+            var daybreakEventMessage = new BusMessage("daybreak", null);
+            var birthdayEventMessage = new BusMessage("birthday", null);
+            var robinPrevious = new Person("Robin", age: 35) { HairColour = "brown" };
+            var robinCurrent = new Person("Robin", age: 36) { HairColour = "grey" };
 
             var eventLogger = new EventLogger();
 
-            eventLogger.LogThat(new BusMessage("birthday", null)).WasReceived();
-            eventLogger.LogThat(robin).Became(robinNew);
+            eventLogger.LogEvent(daybreakEventMessage);
 
-            var analyser = new EventAnalyser(GetRelationStore(), GetDescribers());
+            eventLogger.LogThat(birthdayEventMessage).WasReceived()
+                       .AndThus(robinPrevious).Became(robinCurrent);
 
-            foreach (var exp in analyser.GetExpressions(eventLogger)) Console.WriteLine(exp);
+            var objectDescriber = new ObjectDescriber();
+            var eventDescriber = new EventDescriber(objectDescriber);
+
+            objectDescriber.AddDescriber<Person>(p => new Noun($"{p.Name}"));
+            objectDescriber.AddPronoun<Person>(p => Pronouns.Male);
+            objectDescriber.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
+            eventDescriber.Describe(eventLogger.Events).ToList().ForEach(e => e.PrintToConsole());
+
             Console.ReadLine();
-        }
-
-        static RelationStore GetRelationStore()
-        {
-            var relationStore = new RelationStore();
-            relationStore.DeclareThat<BusMessage>(m => m.Type == "birthday").CanAlter<Person>(p => p.Age);
-            return relationStore;
-        }
-
-        static ObjectExpressionConverter GetDescribers()
-        {
-            var c = new ObjectExpressionConverter();
-            c.AddDescriber<Person>(p => new Noun($"{p.Name}"));
-            c.AddPronoun<Person>(p => Pronouns.Male);
-            c.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
-            return c;
         }
     }
 

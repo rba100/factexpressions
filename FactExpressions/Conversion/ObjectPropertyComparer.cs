@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -18,23 +17,23 @@ namespace FactExpressions.Conversion
             {
                 if (!property.CanRead) continue;
 
-                var xVal = property.GetValue(previous);
-                var yVal = property.GetValue(current);
+                var previousValue = property.GetValue(previous);
+                var currentValue = property.GetValue(current);
 
-                if (xVal != null)
+                if (previousValue != null)
                 {
-                    if (!xVal.Equals(yVal))
+                    if (!previousValue.Equals(currentValue))
                     {
                         differences.Add(new PropertyDifference(property,
-                            xVal,
-                            yVal));
+                            previousValue,
+                            currentValue));
                     }
                 }
-                else if (yVal != null)
+                else if (currentValue != null)
                 {
                     differences.Add(new PropertyDifference(property,
                         null,
-                        yVal));
+                        currentValue));
                 }
             }
 

@@ -9,7 +9,7 @@ namespace FactExpressions.Conversion
     /// <summary>
     /// Maps objects to language constructs
     /// </summary>
-    public class ObjectExpressionConverter : IObjectExpressionConverter
+    public class ObjectDescriber : IObjectDescriber
     {
         private readonly Dictionary<Type, object> m_Describers = new Dictionary<Type, object>();
         private readonly Dictionary<Type, object> m_Pronouns = new Dictionary<Type, object>();
@@ -32,7 +32,7 @@ namespace FactExpressions.Conversion
             m_Pronouns.Add(type, describer);
         }
 
-        public INoun Get(object obj)
+        public INoun GetNoun(object obj)
         {
             if(obj == null) return new Noun("null");
 
@@ -50,7 +50,7 @@ namespace FactExpressions.Conversion
 
         public IExpression GetTransitionExpression(object subject, IEnumerable<PropertyDifference> differences)
         {
-            var subExpression = Get(subject);
+            var subExpression = GetNoun(subject);
             var diffs = differences.ToArray();
             if (!diffs.Any()) throw new ArgumentException("There were no differences", nameof(differences));
             var diffExps = new List<IExpression>();
@@ -58,14 +58,14 @@ namespace FactExpressions.Conversion
             {
                 var sub = i == 0 ? subExpression : GetPronoun(subject);
                 var poss = new Possessive(sub, GetNoun(diffs[i].Property));
-                diffExps.Add(new VerbExpression(Verbs.ToBecome, poss, Get(diffs[i].Current)));
+                diffExps.Add(new VerbExpression(Verbs.ToBecome, poss, GetNoun(diffs[i].Current)));
             }
             return diffExps.Aggregate((agg, next) => new ConjunctionExpression(agg, "and", next));
         }
 
         public INoun GetPossessiveNoun(object owner, PropertyInfo owned)
         {
-            return new Possessive(Get(owner), GetNoun(owned));
+            return new Possessive(GetNoun(owner), GetNoun(owned));
         }
 
         public Pronoun GetPronoun(object obj)
