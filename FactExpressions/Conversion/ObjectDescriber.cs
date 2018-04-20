@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 using FactExpressions.Language;
 
 namespace FactExpressions.Conversion
@@ -49,9 +50,9 @@ namespace FactExpressions.Conversion
 
             if (!(describer is Delegate converter)) return new Noun(obj.ToString());
             var result = converter.DynamicInvoke(obj);
-            if (result is INoun)
+            if (result is INoun noun)
             {
-                return result as INoun;
+                return noun;
             }
             return new Noun(result as string);
         }
@@ -80,14 +81,15 @@ namespace FactExpressions.Conversion
         {
             var type = obj.GetType();
             var pronounFunc = m_Pronouns.ContainsKey(type) ? m_Pronouns[type] : null;
-            var converter = pronounFunc as Delegate;
-            if (converter == null) return new Pronoun("it", "it", "its");
-            var result = converter.DynamicInvoke(obj);
-            if (result is Pronoun)
+            if (!(pronounFunc is Delegate converter))
             {
-                return result as Pronoun;
+                return Pronouns.It;
             }
-            return new Pronoun("it", "it", "its");
+            if (converter.DynamicInvoke(obj) is Pronoun pronoun)
+            {
+                return pronoun;
+            }
+            return Pronouns.It;
         }
 
         private INoun GetNoun(PropertyInfo propertyInfo)

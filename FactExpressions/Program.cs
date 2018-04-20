@@ -15,26 +15,29 @@ namespace FactExpressions
         {
             var daybreakEventMessage = new BusMessage("daybreak", null);
             var birthdayEventMessage = new BusMessage("birthday", null);
-            var mogginsPrevious = new Pet("old moggins", "cat", 4);
-            var mogginsCurrent = new Pet("old moggins", "cat", 3);
+
+            var mogginsPrevious = new Pet("old moggins", "cat", remainingLimbs: 4);
+            var mogginsCurrent  = new Pet("old moggins", "cat", remainingLimbs: 3);
 
             var robinPrevious = new Person("Robin", age: 35) { HairColour = "brown", Pets = new[] { mogginsPrevious } };
-            var robinCurrent = new Person("Robin", age: 36) { HairColour = "grey", Pets = new[] { mogginsPrevious } };
+            var robinCurrent  = new Person("Robin", age: 36) { HairColour = "grey",  Pets = new[] { mogginsPrevious } };
 
             IEventLogger eventLogger = new EventLogger();
 
             eventLogger.LogEvent(daybreakEventMessage);
 
-            eventLogger.LogThat(birthdayEventMessage).WasReceived()
-                       .AndThus(robinPrevious).Became(robinCurrent);
+            var childLogger = eventLogger.LogThat(birthdayEventMessage).WasReceived().GetChildLogger();
+            childLogger.LogThat(robinPrevious).Became(robinCurrent);
 
-            eventLogger.LogEvent("accident").AndThus(mogginsPrevious).Became(mogginsCurrent);
+            eventLogger.LogEvent("accident")
+                       .AndThus(mogginsPrevious)
+                       .Became(mogginsCurrent);
 
             var objectDescriber = new ObjectDescriber();
             var eventDescriber = new EventDescriber(objectDescriber);
 
             objectDescriber.AddDescriber<Person>(p => new Noun($"{p.Name}"));
-            objectDescriber.AddDescriber<Pet>(p => new Noun($"{p.Name} the {p.Species}"));
+            objectDescriber.AddDescriber<Pet>(p => new Noun($"{p.Name} the {p.Species} with {p.RemainingLimbs} leg{(p.RemainingLimbs == 1 ? "" : "s")}"));
             objectDescriber.AddDescriber<IEnumerable<Pet>>(pets => "'" + string.Join(", ", pets.Select(p => objectDescriber.GetNoun(p))) + "'");
             objectDescriber.AddPronoun<Person>(p => Pronouns.Male);
             objectDescriber.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
