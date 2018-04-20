@@ -13,6 +13,11 @@ namespace FactExpressions.Events
             return new EventBuilder(this, subject);
         }
 
+        public EventBuilder And(object subject)
+        {
+            return new EventBuilder(this, subject);
+        }
+
         public IScopingEventLogger LogEvent(object subject)
         {
             var evnt = new Event(subject);
@@ -59,6 +64,11 @@ namespace FactExpressions.Events
         }
 
         public EventBuilder LogThat(object subject)
+        {
+            return new EventBuilder(this, subject);
+        }
+
+        public EventBuilder And(object subject)
         {
             return new EventBuilder(this, subject);
         }

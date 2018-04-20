@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using FactExpressions.Conversion;
@@ -14,8 +15,11 @@ namespace FactExpressions
         {
             var daybreakEventMessage = new BusMessage("daybreak", null);
             var birthdayEventMessage = new BusMessage("birthday", null);
-            var robinPrevious = new Person("Robin", age: 35) { HairColour = "brown" };
-            var robinCurrent = new Person("Robin", age: 36) { HairColour = "grey" };
+            var mogginsPrevious = new Pet("old moggins", "cat", 4);
+            var mogginsCurrent = new Pet("old moggins", "cat", 3);
+
+            var robinPrevious = new Person("Robin", age: 35) { HairColour = "brown", Pets = new[] { mogginsPrevious } };
+            var robinCurrent = new Person("Robin", age: 36) { HairColour = "grey", Pets = new[] { mogginsPrevious } };
 
             IEventLogger eventLogger = new EventLogger();
 
@@ -24,10 +28,14 @@ namespace FactExpressions
             eventLogger.LogThat(birthdayEventMessage).WasReceived()
                        .AndThus(robinPrevious).Became(robinCurrent);
 
+            eventLogger.LogEvent("accident").AndThus(mogginsPrevious).Became(mogginsCurrent);
+
             var objectDescriber = new ObjectDescriber();
             var eventDescriber = new EventDescriber(objectDescriber);
 
             objectDescriber.AddDescriber<Person>(p => new Noun($"{p.Name}"));
+            objectDescriber.AddDescriber<Pet>(p => new Noun($"{p.Name} the {p.Species}"));
+            objectDescriber.AddDescriber<IEnumerable<Pet>>(pets => "'" + string.Join(", ", pets.Select(p => objectDescriber.GetNoun(p))) + "'");
             objectDescriber.AddPronoun<Person>(p => Pronouns.Male);
             objectDescriber.AddDescriber<BusMessage>(m => new Noun($"Message of type {m.Type}"));
             eventDescriber.Describe(eventLogger.EventItems()).ToList().ForEach(e => e.PrintToConsole());
@@ -53,6 +61,8 @@ namespace FactExpressions
         public string Name { get; }
         public Double Age { get; }
 
+        public IReadOnlyCollection<Pet> Pets { get; set; }
+
         public string HairColour { get; set; }
 
         public Person(string name, double age)
@@ -64,6 +74,44 @@ namespace FactExpressions
         public override string ToString()
         {
             return Name;
+        }
+    }
+
+    public class Pet
+    {
+        public string Name { get; }
+        public string Species { get; }
+        public int RemainingLimbs { get; }
+
+        public Pet(string name, string species, int remainingLimbs)
+        {
+            Name = name;
+            Species = species;
+            RemainingLimbs = remainingLimbs;
+        }
+
+        protected bool Equals(Pet other)
+        {
+            return string.Equals(Name, other.Name) && string.Equals(Species, other.Species) && RemainingLimbs == other.RemainingLimbs;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Pet)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Species != null ? Species.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ RemainingLimbs;
+                return hashCode;
+            }
         }
     }
 }

@@ -22,7 +22,18 @@ namespace FactExpressions.Conversion
 
                 if (previousValue != null)
                 {
-                    if (!previousValue.Equals(currentValue))
+                    if (typeof(IReadOnlyCollection<object>).IsAssignableFrom(property.PropertyType))
+                    {
+                        var previousCollection = previousValue as IReadOnlyCollection<object>;
+                        var currentCollection = currentValue as IReadOnlyCollection<object>;
+                        if (!CollectionEqual(previousCollection, currentCollection))
+                        {
+                            differences.Add(new PropertyDifference(property,
+                                                                   previousValue,
+                                                                   currentValue));
+                        }
+                    }
+                    else if (!previousValue.Equals(currentValue))
                     {
                         differences.Add(new PropertyDifference(property,
                             previousValue,
@@ -38,6 +49,23 @@ namespace FactExpressions.Conversion
             }
 
             return differences;
+        }
+
+        private bool CollectionEqual(IReadOnlyCollection<object> previousCollection,
+                                     IReadOnlyCollection<object> currentCollection)
+        {
+            if (previousCollection.Count != currentCollection.Count) return false;
+
+            using (var previousEnumerator = previousCollection.GetEnumerator())
+            using (var currentEnumerator = currentCollection.GetEnumerator())
+            {
+                while (previousEnumerator.MoveNext() && currentEnumerator.MoveNext())
+                {
+                    if (!previousEnumerator.Current.Equals(currentEnumerator.Current)) return false;
+                }
+            }
+
+            return true;
         }
     }
 

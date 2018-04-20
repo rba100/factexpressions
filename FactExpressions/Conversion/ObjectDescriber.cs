@@ -34,12 +34,20 @@ namespace FactExpressions.Conversion
 
         public INoun GetNoun(object obj)
         {
-            if(obj == null) return new Noun("null");
+            if (obj == null) return new Noun("null");
 
             var type = obj.GetType();
             var describer = m_Describers.ContainsKey(type) ? m_Describers[type] : null;
-            var converter = describer as Delegate;
-            if (converter == null) return new Noun(obj.ToString());
+            if (describer == null)
+            {
+                var firstSimilarType = m_Describers.Keys.FirstOrDefault(k => k.IsAssignableFrom(type));
+                describer = firstSimilarType != null 
+                    ? m_Describers.ContainsKey(firstSimilarType)
+                        ? m_Describers[firstSimilarType] : null 
+                    : null;
+            }
+
+            if (!(describer is Delegate converter)) return new Noun(obj.ToString());
             var result = converter.DynamicInvoke(obj);
             if (result is INoun)
             {
